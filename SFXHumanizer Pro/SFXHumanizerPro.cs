@@ -115,6 +115,9 @@ namespace SFXHumanizer_Pro
                     new MenuItem(spellMenu.Name + ".range-delay", "Dynamic Range Delay %").SetValue(
                         new Slider(100, 0, 200)).SetTooltip("0 = Disabled. As higher the value as higher is the delay."));
                 spellMenu.AddItem(
+                    new MenuItem(spellMenu.Name + ".minion-percent-delay", "Delay Percentage on Minion Cast").SetValue(
+                        new Slider(40, 0, 100)).SetTooltip("The percentage of delay applied to spells casted on minions."));
+                spellMenu.AddItem(
                     new MenuItem(spellMenu.Name + ".position", "Randomized Position").SetValue(new Slider(10, 0, 25))
                         .SetTooltip("Randomize the cast position based on the value."));
                 spellMenu.AddItem(
@@ -137,6 +140,9 @@ namespace SFXHumanizer_Pro
                 orderMenu.AddItem(
                     new MenuItem(orderMenu.Name + ".range-delay", "Dynamic Attack Range Delay %").SetValue(
                         new Slider(100, 0, 200)).SetTooltip("0 = Disabled. As higher the value as higher is the delay."));
+                orderMenu.AddItem(
+                    new MenuItem(orderMenu.Name + ".minion-percent-delay", "Delay Percentage on Minion Attacks").SetValue(
+                        new Slider(25, 0, 100)).SetTooltip("The percentage of delay applied to auto attacks on minions."));
                 orderMenu.AddItem(
                     new MenuItem(orderMenu.Name + ".position", "Randomized Position").SetValue(new Slider(20, 0, 50))
                         .SetTooltip("Randomize the click position based on the value."));
@@ -339,7 +345,7 @@ namespace SFXHumanizer_Pro
                 #region Screen
 
                 if (_menu.Item(_menu.Name + ".spells.screen").GetValue<bool>() && position.IsValid() &&
-                    !position.IsOnScreen())
+                    !IsOnScreen(position))
                 {
                     args.Process = false;
                     _blockedOrders++;
@@ -390,6 +396,17 @@ namespace SFXHumanizer_Pro
                     if (percent > 0)
                     {
                         delay = Math.Max(delay, GetRangeDelay(position, _lastCastPosition, percent));
+                    }
+                }
+
+                if (args.Target != null && args.Target.IsValid<Obj_AI_Minion>())
+                {
+                    Obj_AI_Minion minion = (Obj_AI_Minion) args.Target;
+
+                    if (MinionManager.IsMinion(minion))
+                    {
+                        var multiplier = _menu.Item(_menu.Name + ".spells.minion-percent.delay").GetValue<Slider>().Value / 100.0f;
+                        delay = (int) (delay * multiplier);
                     }
                 }
 
@@ -483,7 +500,7 @@ namespace SFXHumanizer_Pro
                         return;
                     }
                     var position = args.Target != null ? args.Target.Position : args.TargetPosition;
-                    if (_menu.Item(_menu.Name + ".orders.screen").GetValue<bool>() && !position.IsOnScreen())
+                    if (_menu.Item(_menu.Name + ".orders.screen").GetValue<bool>() && !IsOnScreen(position))
                     {
                         args.Process = false;
                         _blockedOrders++;
@@ -518,6 +535,18 @@ namespace SFXHumanizer_Pro
                                      _menu.Item(_menu.Name + ".orders.sharp-turn").GetValue<Slider>().Value);
                         }
                     }
+
+                    if (args.Target != null && args.Target.IsValid<Obj_AI_Minion>())
+                        {
+                        Obj_AI_Minion minion = (Obj_AI_Minion) args.Target;
+
+                        if (MinionManager.IsMinion(minion))
+                        {
+                            var multiplier = _menu.Item(_menu.Name + ".spells.minion-percent.delay").GetValue<Slider>().Value / 100.0f;
+                            delay = (int) (delay * multiplier);
+                        }
+                    }
+
                     if (Utils.GameTimeTickCount - sequence.LastIndexChange <= delay)
                     {
                         args.Process = false;
@@ -548,6 +577,19 @@ namespace SFXHumanizer_Pro
                 args.Process = true;
                 Console.WriteLine(ex);
             }
+        }
+
+        private bool IsOnScreen(Vector3 position)
+        {
+            if (position.IsOnScreen())
+            {
+                return true;
+            }
+            if (!(Game.CursorPos.Distance(position) > 250f))
+            {
+                return true;
+            }
+            return (Drawing.WorldToScreen(Game.CursorPos).Distance(Utils.GetCursorPos()) <= 100f);
         }
 
         private bool IsSpellEnabled(SpellSlot slot)
