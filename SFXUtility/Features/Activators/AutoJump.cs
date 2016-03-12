@@ -209,53 +209,13 @@ namespace SFXUtility.Features.Activators
             }
         }
 
-        private SpellSlot GetWardSlot()
-        {
-            try
-            {
-                if (ItemData.Trackers_Knife.GetItem().IsOwned() && ItemData.Trackers_Knife.GetItem().IsReady())
-                {
-                    return ItemData.Trackers_Knife.GetItem().Slots.FirstOrDefault();
-                }
-                if (ItemData.Sightstone.GetItem().IsOwned() && ItemData.Sightstone.GetItem().IsReady())
-                {
-                    return ItemData.Sightstone.GetItem().Slots.FirstOrDefault();
-                }
-                if (ItemData.Ruby_Sightstone.GetItem().IsOwned() && ItemData.Ruby_Sightstone.GetItem().IsReady())
-                {
-                    return ItemData.Ruby_Sightstone.GetItem().Slots.FirstOrDefault();
-                }
-                if (ItemData.Eye_of_the_Watchers.GetItem().IsOwned() && ItemData.Eye_of_the_Watchers.GetItem().IsReady())
-                {
-                    return ItemData.Eye_of_the_Watchers.GetItem().Slots.FirstOrDefault();
-                }
-                if (ItemData.Eye_of_the_Equinox.GetItem().IsOwned() && ItemData.Eye_of_the_Equinox.GetItem().IsReady())
-                {
-                    return ItemData.Eye_of_the_Equinox.GetItem().Slots.FirstOrDefault();
-                }
-                if (ItemData.Eye_of_the_Oasis.GetItem().IsOwned() && ItemData.Eye_of_the_Oasis.GetItem().IsReady())
-                {
-                    return ItemData.Eye_of_the_Oasis.GetItem().Slots.FirstOrDefault();
-                }
-                if (ItemData.Warding_Totem_Trinket.GetItem().IsOwned() &&
-                    ItemData.Warding_Totem_Trinket.GetItem().IsReady())
-                {
-                    return ItemData.Warding_Totem_Trinket.GetItem().Slots.FirstOrDefault();
-                }
-                if (ItemData.Farsight_Alteration.GetItem().IsOwned() && ItemData.Farsight_Alteration.GetItem().IsReady())
-                {
-                    return ItemData.Farsight_Alteration.GetItem().Slots.FirstOrDefault();
-                }
-                if (ItemData.Vision_Ward.GetItem().IsOwned() && ItemData.Vision_Ward.GetItem().IsReady())
-                {
-                    return ItemData.Vision_Ward.GetItem().Slots.FirstOrDefault();
-                }
+        private SpellSlot GetWardSlot() {
+            SpellSlot returnSlot = SpellSlot.Unknown;
+            InventorySlot slot = Items.GetWardSlot();
+            if (slot != default(InventorySlot)) {
+                returnSlot = slot.SpellSlot;
             }
-            catch (Exception ex)
-            {
-                Global.Logger.AddItem(new LogItem(ex));
-            }
-            return SpellSlot.Unknown;
+            return returnSlot;
         }
 
         private class HeroJump

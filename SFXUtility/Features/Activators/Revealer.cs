@@ -238,8 +238,10 @@ namespace SFXUtility.Features.Activators
                 var slot = GetRevealSlot(bush);
                 if (slot != SpellSlot.Unknown)
                 {
-                    ObjectManager.Player.Spellbook.CastSpell(slot, ObjectManager.Player.Position.Extend(pos, MaxRange));
-                    _lastReveal = Game.Time;
+                    Utility.DelayAction.Add(new Random().Next(300, 750), () => {
+                        ObjectManager.Player.Spellbook.CastSpell(slot, ObjectManager.Player.Position.Extend(pos, MaxRange));
+                        _lastReveal = Game.Time;
+                    });
                 }
             }
             catch (Exception ex)
