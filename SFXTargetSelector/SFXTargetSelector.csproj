@@ -37,13 +37,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="LeagueSharp">
-      <HintPath>..\..\..\..\..\..\Kappa\System\LeagueSharp.dll</HintPath>
+      <HintPath>C:\Kappa\System\LeagueSharp.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp.Common">
-      <HintPath>..\..\..\..\..\..\Kappa\System\LeagueSharp.Common.dll</HintPath>
+      <HintPath>C:\Kappa\System\LeagueSharp.Common.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>..\..\..\..\..\..\Kappa\System\SharpDX.dll</HintPath>
+      <HintPath>C:\Kappa\System\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

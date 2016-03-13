@@ -52,6 +52,7 @@ namespace SFXUtility.Features.Activators
         private HeroJump _heroJump;
         private float _lastWardTime;
         private Spell _spell;
+        private bool casted = false;
 
         public AutoJump(Activators parent) : base(parent)
         {
@@ -113,6 +114,20 @@ namespace SFXUtility.Features.Activators
                 {
                     _heroJump = heroJump;
                     _spell = new Spell(heroJump.Slot, heroJump.Range);
+
+
+                    Obj_AI_Base.OnProcessSpellCast += (sender, args) => {
+                        if (sender.IsMe && args.SData.Name.Equals(this._heroJump.Name)) {
+                            this.casted = false;
+                        }
+                    };
+
+                    Spellbook.OnCastSpell += (sender, args) => {
+                        if (args.Slot == SpellSlot.W) {
+                            this.casted = true;
+                            Utility.DelayAction.Add(150, () => casted = false);
+                        }
+                    };
                 }
 
                 base.OnInitialize();
@@ -168,8 +183,8 @@ namespace SFXUtility.Features.Activators
                     return;
                 }
 
-                if (_spell != null && _heroJump != null && _spell.IsReady() && _heroJump.CustomCheck != null &&
-                    _heroJump.CustomCheck(_spell))
+                if (_spell != null && _heroJump != null && _spell.IsReady() && (_heroJump.CustomCheck == null ||
+                    _heroJump.CustomCheck(_spell)))
                 {
                     var jumpPosition = ObjectManager.Player.ServerPosition.Extend(
                         Game.CursorPos, Math.Min(_spell.Range, ObjectManager.Player.Position.Distance(Game.CursorPos)));
@@ -178,7 +193,7 @@ namespace SFXUtility.Features.Activators
 
                     var possibleJumps = GetPossibleObjects(jumpPosition);
                     var target = possibleJumps.FirstOrDefault();
-                    if (target != null)
+                    if (target != null && !this.casted)
                     {
                         _spell.CastOnUnit(target);
                         return;
@@ -186,7 +201,7 @@ namespace SFXUtility.Features.Activators
 
                     var possibleJumps2 = GetPossibleObjects(castPosition);
                     var target2 = possibleJumps2.FirstOrDefault();
-                    if (target2 != null)
+                    if (target2 != null && !this.casted)
                     {
                         _spell.CastOnUnit(target2);
                         return;
