@@ -72,6 +72,8 @@ namespace SFXHumanizer_Pro
         private int _lastFlashCast;
         private int _lastItemCast;
         private int _lastSpellCast;
+        public int _lastMouseTime = Utils.TickCount;
+        public Vector2 _lastMousePos = Game.CursorPos.To2D();
         private Menu _menu;
 
         public SFXHumanizerPro()
@@ -126,6 +128,9 @@ namespace SFXHumanizer_Pro
                 spellMenu.AddItem(
                     new MenuItem(spellMenu.Name + ".checks2", "Additional Checks 2").SetValue(true)
                         .SetTooltip("Checks if currently no other spell is casted."));
+                spellMenu.AddItem(
+                    new MenuItem(spellMenu.Name + ".checks3", "Additional Checks 3").SetValue(true)
+                        .SetTooltip("Check if spell location is inhuman."));
                 spellMenu.AddItem(
                     new MenuItem(spellMenu.Name + ".screen", "Block Offscreen").SetValue(false)
                         .SetTooltip("Block all spells which are outside of your screen / view."));
@@ -381,6 +386,18 @@ namespace SFXHumanizer_Pro
                     }
                 }
 
+                var screenPos = Drawing.WorldToScreen(position);
+                if (_menu.Item(_menu.Name + ".spells.checks3").GetValue<bool>()
+                    && ((Utils.TickCount - _lastMouseTime) < (_lastMousePos.Distance(screenPos) / 20)))
+                {
+                    args.Process = false;
+                    _blockedSpells++;
+                    return;
+                }
+
+                _lastMouseTime = Utils.TickCount;
+                _lastMousePos = screenPos;
+
                 #endregion Checks
 
                 #region Delay
@@ -500,6 +517,9 @@ namespace SFXHumanizer_Pro
                         return;
                     }
                     var position = args.Target != null ? args.Target.Position : args.TargetPosition;
+                    _lastMouseTime = Utils.TickCount;
+                    _lastMousePos = Drawing.WorldToScreen(position);
+
                     if (_menu.Item(_menu.Name + ".orders.screen").GetValue<bool>() && !IsOnScreen(position))
                     {
                         args.Process = false;
